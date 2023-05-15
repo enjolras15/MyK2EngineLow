@@ -13,6 +13,7 @@ public:
 private:
 
 	ModelRender modelRender;
+	ModelRender modelRender2;
 	SpriteRender spriteRender;
 	FontRender fontRender;
 

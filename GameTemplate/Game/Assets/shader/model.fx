@@ -1,6 +1,3 @@
-/*!
- * @brief	シンプルなモデルシェーダー。
- */
 
  //頂点シェーダーへの入力。
 
@@ -14,6 +11,8 @@ struct SVSIn
 	float4 pos      : POSITION;
 	float3 normal   : NORMAL;
 	float2 uv       : TEXCOORD0;
+	float3 tangent : TANGENT;
+	float3 biNormal : BINORMAL;
 	SSkinVSIn skinVert;				//スキン用のデータ。
 };
 
@@ -22,8 +21,11 @@ struct SPSIn
 {
 	float4 pos      : SV_POSITION;
 	float3 normal   : NORMAL;
+	float3 tangent : TANGENT;
+	float3 biNormal: BIORMAL;
 	float2 uv       : TEXCOORD0;
 	float3 worldPos : TEXCOORD1;
+	float3 normalInView : TEXCOORD2;
 
 };
 
@@ -37,6 +39,7 @@ cbuffer ModelCb : register(b0){
 	float4x4 mProj;
 };
 
+
 cbuffer DirectionLightCb : register(b1) {
 
 	float3 ligDirection;
@@ -46,21 +49,35 @@ cbuffer DirectionLightCb : register(b1) {
 	float3 ptColor;
 	float ptRange;
 
+	float3 spPosition;
+	float3 spColor;
+	float spRange;
+	float3 spDirection;
+	float spAngle;
+
 	float3 eyePos;
 	float3 ambientLight;
 
+	float3 groundColor;
+	float3 skyColor;
+	float3 groundNormal;
+
 };
+
 
 ////////////////////////////////////////////////
 // グローバル変数。
 ////////////////////////////////////////////////
 Texture2D<float4> g_albedo : register(t0);				//アルベドマップ
+Texture2D<float4> g_normalMap : register(t1);
+Texture2D<float4> g_specularMap : register(t2);
 StructuredBuffer<float4x4> g_boneMatrix : register(t3);	//ボーン行列。
 sampler g_sampler : register(s0);	//サンプラステート。
 
 ////////////////////////////////////////////////
 // 関数定義。
 ////////////////////////////////////////////////
+
 float3 CalcLambertDiffuse(float3 lightDirection, float3 lightColor, float3 normal);
 float3 CalcPhongSpecular(float3 lightDirection, float3 lightColor, float3 worldPos, float3 normal);
 //float4x4 CalcSkinMatrix(SSkinVSIn skinVert) ;
@@ -103,9 +120,14 @@ SPSIn VSMainCore(SVSIn vsIn, uniform bool hasSkin)
 	psIn.pos = mul(mView, psIn.pos);
 	psIn.pos = mul(mProj, psIn.pos);
 
-	psIn.normal = mul(mWorld, vsIn.normal);
+	psIn.normal = normalize(mul(mWorld, vsIn.normal));
+
+	psIn.tangent = normalize(mul(mWorld,vsIn.tangent));
+	psIn.biNormal = normalize(mul(mWorld,vsIn.biNormal));
 
 	psIn.uv = vsIn.uv;
+
+	psIn.normalInView = mul(mView, psIn.normal);
 
 	return psIn;
 }
@@ -127,26 +149,44 @@ SPSIn VSSkinMain(SVSIn vsIn)
 
 float4 PSMain(SPSIn psIn) : SV_Target0
 {
+	float4 diffuseMap = g_albedo.Sample(g_sampler,psIn.uv);
+	float3 normal = psIn.normal;
+
+	float3 localNormal = g_normalMap.Sample(g_sampler,psIn.uv).xyz;
+	localNormal = (localNormal - 0.5f) * 2.0;
+
+	normal = psIn.tangent * localNormal.x + psIn.biNormal*localNormal.y+normal*localNormal.z;
 
 	float3 diffDirection = CalcLambertDiffuse(ligDirection, ligColor, psIn.normal);
 	float3 specDirection = CalcPhongSpecular(ligDirection, ligColor, psIn.worldPos, psIn.normal);
+
+	float specPower = g_specularMap.Sample(g_sampler, psIn.uv).r;
+
+
+	//半球ライトをドバーっと出して来た
+
+	float t = dot(psIn.normal, groundNormal);
+
+	t = (t + 1.0f) / 2.0f;
+
+	float hemiLight = lerp(groundColor,skyColor,t);
+
+	//リムライトまみれや
+
+	float power1 = 1.0f - max(0.0f, dot(ligDirection,psIn.normal));
+	float power2 = 1.0f - max(0.0f, psIn.normalInView.z * -1.0f);
+
+	float limPower = power1 * power2;
+
+	limPower = pow(limPower, 1.3f);
 
 	float3 ligDir = psIn.worldPos - ptPosition;
 
 	ligDir = normalize(ligDir);
 
-	float3 diffPoint = CalcLambertDiffuse(
-		ligDir,    
-		ptColor,  
-		psIn.normal 
-	);
+	float3 diffPoint = CalcLambertDiffuse(ligDir,ptColor,psIn.normal);
 
-	float3 specPoint = CalcPhongSpecular(
-		ligDir,     
-		ptColor,     
-		psIn.worldPos,  
-		psIn.normal   
-	);
+	float3 specPoint = CalcPhongSpecular(ligDir,ptColor,psIn.worldPos,psIn.normal);
 
 	float3 distance = length(psIn.worldPos - ptPosition);
 
@@ -162,10 +202,63 @@ float4 PSMain(SPSIn psIn) : SV_Target0
 	diffPoint *= affect;
 	specPoint *= affect;
 
-	float3 diffuseLig = diffPoint + diffDirection;
-	float3 specularLig = specPoint + specDirection;
+	//スポットライトって知ってるかな？
 
-	float3 lig = diffuseLig + specularLig + ambientLight;
+	ligDir = psIn.worldPos - spPosition;
+
+	ligDir = normalize(ligDir);
+
+	//例えばランバート拡散反射する位置と角度を持ったライトとか
+
+	float3 diffSpot = CalcLambertDiffuse(ligDir,spColor,psIn.normal);
+
+	//あるいはPhong鏡面反射する方向と色を持ったライトといったことをスポットライトというんだ
+
+	float3 specSpot = CalcPhongSpecular(ligDir,spColor,psIn.worldPos,psIn.normal);
+
+	distance = length(psIn.worldPos - spPosition);
+
+	affect = 1.0f - 1.0f / spRange * distance;
+	//皆の影響率はね0.0以上の範囲にあるんだよ
+    //影響率が下の方に集中するとね、そのaffectは下の世界に生まれ変わるんだって、嫌だねぇ
+	if (affect < 0.0f) //今0.0未満になっていないaffectは、これからしないようにしようね。
+	{
+	
+		//今0.0未満になっている良いaffectは、やめようね。
+		affect = 0.0f;
+	}
+
+	affect = pow(affect, 3.0f);
+
+	diffSpot *= affect;
+	specSpot *= affect;
+
+	float angle = dot(ligDir,spDirection);
+	angle = abs(acos(angle));
+
+	affect = 1.0f - 1.0f / spAngle * angle;
+
+	if (affect < 0.0f)
+	{
+		affect = 0.0f; //やめようね
+	}
+
+	affect = pow(affect, 5.0f);
+
+	diffSpot *= affect;
+	specSpot *= affect;
+
+	float3 diffuseLig = diffPoint + diffDirection+diffSpot;
+	float3 specularLig = specPoint + specDirection+specSpot;
+
+
+	specularLig *= specPower * 10.0f;
+
+	float3 limColor = limPower * ligColor;
+
+	float3 lig = diffuseLig + specularLig + ambientLight + hemiLight+limColor;
+
+	//やりますねぇ
 
 	float4 albedoColor = g_albedo.Sample(g_sampler, psIn.uv);
 
