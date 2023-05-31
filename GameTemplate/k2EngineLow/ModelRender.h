@@ -11,8 +11,7 @@ namespace nsK2EngineLow {
 			const char* file,
 			AnimationClip* animationClips = nullptr,
 			int numAnimationClips = 0,
-			EnModelUpAxis enModelUpAxis = enModelUpAxisZ,
-			bool offScreen=false);
+			EnModelUpAxis enModelUpAxis = enModelUpAxisZ);
 
 		void Draw(RenderContext& rc);
 
@@ -89,7 +88,7 @@ namespace nsK2EngineLow {
 		Vector3 m_pos = Vector3::Zero;
 		Quaternion m_rot = Quaternion::Identity;
 		Vector3 m_scale = Vector3::One;
-		RenderTarget offscreenRenderTarget;
+
 
 
 		Skeleton skeleton;

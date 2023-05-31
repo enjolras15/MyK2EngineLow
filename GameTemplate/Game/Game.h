@@ -16,6 +16,7 @@ private:
 	ModelRender modelRender2;
 	SpriteRender spriteRender;
 	FontRender fontRender;
+	OffScreen offScreen;
 
 	wchar_t text;
 

@@ -55,14 +55,6 @@ namespace nsK2EngineLow {
 		light.skyColor.y = 1.0f;
 		light.skyColor.z = 0.0f;
 
-		offscreenRenderTarget.Create(
-			1280,
-			720,
-			1,
-			1,
-			DXGI_FORMAT_R8G8B8A8_UNORM,
-			DXGI_FORMAT_D32_FLOAT
-		);
 
 	}
 
@@ -70,8 +62,7 @@ namespace nsK2EngineLow {
 		const char* file,
 		AnimationClip* animationClips,
 		int numAnimationClips,
-		EnModelUpAxis enModelUpAxis,
-		bool offScreen)
+		EnModelUpAxis enModelUpAxis)
 	{
 
 		modelInitData.m_fxFilePath = "Assets/shader/model.fx";
@@ -111,33 +102,12 @@ namespace nsK2EngineLow {
 
 		model.Init(modelInitData);
 
-		if (offScreen) {
 
-			//オフスクリーンの世界に生まれ変わるんだって、嫌だねぇ
-			model.ChangeAlbedoMap(
-				"",
-				offscreenRenderTarget.GetRenderTargetTexture()
-			);
 
-		}
 
 	}
 
 	void ModelRender::Draw(RenderContext& rc) {
-	
-		RenderTarget* rtArray[] = { &offscreenRenderTarget };
-		rc.WaitUntilToPossibleSetRenderTargets(1, rtArray);
-		rc.SetRenderTargets(1, rtArray);
-		rc.ClearRenderTargetViews(1, rtArray);
-
-		model.Draw(rc);
-
-		rc.WaitUntilFinishDrawingToRenderTargets(1, rtArray);
-
-		rc.SetRenderTarget(
-			g_graphicsEngine->GetCurrentFrameBuffuerRTV(),
-			g_graphicsEngine->GetCurrentFrameBuffuerDSV()
-		);
 
 		model.Draw(rc);
 
