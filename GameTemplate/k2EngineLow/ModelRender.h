@@ -13,7 +13,18 @@ namespace nsK2EngineLow {
 			int numAnimationClips = 0,
 			EnModelUpAxis enModelUpAxis = enModelUpAxisZ);
 
-		void Draw(RenderContext& rc);
+		void OnRenderModel(RenderContext& rc) {
+
+			model.Draw(rc);
+
+		}
+
+
+		void Draw(RenderContext& rc) {
+
+			g_renderingEngine->AddModels(this);
+
+		}
 
 		void Update();
 

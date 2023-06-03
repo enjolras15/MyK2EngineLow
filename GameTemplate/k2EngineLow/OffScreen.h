@@ -17,7 +17,7 @@ namespace nsK2EngineLow {
 			int numAnimationClips = 0,
 			EnModelUpAxis enModelUpAxis = enModelUpAxisZ);
 
-	    std::vector<const char*> files;
+		std::vector<const char*> files;
 
 		struct Light {
 

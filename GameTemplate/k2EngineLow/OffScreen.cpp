@@ -15,8 +15,7 @@ namespace nsK2EngineLow {
 			1,
 			1,
 			DXGI_FORMAT_R8G8B8A8_UNORM,
-			DXGI_FORMAT_D32_FLOAT,
-			color
+			DXGI_FORMAT_D32_FLOAT
 		);
 
 		//‚à‚¤Šç’†ƒƒ“ƒo‚Ü‚İ‚ê‚â
@@ -109,6 +108,7 @@ namespace nsK2EngineLow {
 
 		model.Init(modelInitData);
 
+	
 		
 		for (int i = 0; i < files.size(); i++) {
 

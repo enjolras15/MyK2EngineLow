@@ -107,11 +107,6 @@ namespace nsK2EngineLow {
 
 	}
 
-	void ModelRender::Draw(RenderContext& rc) {
-
-		model.Draw(rc);
-
-	}
 
 
 	void ModelRender::Update() {
