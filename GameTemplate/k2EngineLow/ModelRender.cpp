@@ -10,50 +10,6 @@ namespace nsK2EngineLow {
 
 	ModelRender::ModelRender() {
 
-		//もう顔中メンバまみれや
-		light.ligDirection.x = 1.0f;
-		light.ligDirection.y = -1.0f;
-		light.ligDirection.z = -1.0f;
-
-		light.ligDirection.Normalize();
-
-		light.ligcolor.x = 0.0f;
-		light.ligcolor.y = 0.0f;
-		light.ligcolor.z = 0.0f;
-
-		light.eyePos = g_camera3D->GetPosition();
-
-		light.ambientLight.x = 0.3f;
-		light.ambientLight.y = 0.3f;
-		light.ambientLight.z = 0.3f;
-
-		light.ptPosition.x = 0.0f;
-		light.ptPosition.y = 0.0f;
-		light.ptPosition.z = 0.0f;
-
-		light.ptColor.x = 0.0f;
-		light.ptColor.y = 0.0f;
-		light.ptColor.z = 0.0f;
-
-		//ああ、早くVector3まみれになろうぜ
-
-		light.spPosition = Vector3{ 0.0f,50.0f,0.0f };
-
-		light.spColor = Vector3{ 10.0f,10.0f,10.0f };
-
-		light.spDirection = Vector3{ 1.0f,-1.0f,1.0f };
-		light.spDirection.Normalize();
-
-		light.spRange = 0.0f;
-		light.spAngle = Math::DegToRad(150.0f);
-
-		light.groundColor.x = 0.7f;
-		light.groundColor.y = 0.7f;
-		light.groundColor.z = 0.3f;
-
-		light.skyColor.x = 0.15f;
-		light.skyColor.y = 1.0f;
-		light.skyColor.z = 0.0f;
 
 
 	}
@@ -67,8 +23,8 @@ namespace nsK2EngineLow {
 
 		modelInitData.m_fxFilePath = "Assets/shader/model.fx";
 		//バッファだって、嫌だねぇ
-		modelInitData.m_expandConstantBuffer = &light;
-		modelInitData.m_expandConstantBufferSize = sizeof(light);
+		modelInitData.m_expandConstantBuffer = &g_renderingEngine->GetSceneLight();
+		modelInitData.m_expandConstantBufferSize = sizeof(g_renderingEngine->GetSceneLight());
 
 		if (animationClips == nullptr) {
 			//滅多にスキンが来ないところなんで
@@ -86,6 +42,7 @@ namespace nsK2EngineLow {
 			animationClip = animationClips;
 			m_numAnimationClips = numAnimationClips;
 
+			//アニメーションクリップ持ってんのかコラ
 			if (animationClip != nullptr) {
 				animation.Init(
 					skeleton,
@@ -98,6 +55,7 @@ namespace nsK2EngineLow {
 
 		modelInitData.m_tkmFilePath = file;
 
+		//向きを変えるんだよ、UpAxisZになるんだよ
 		modelInitData.m_modelUpAxis = enModelUpAxisZ;
 
 		model.Init(modelInitData);
@@ -120,7 +78,7 @@ namespace nsK2EngineLow {
 
 		animation.Progress(1.0 / 60.0f);
 
-		lightModel.UpdateWorldMatrix(light.ptPosition,g_quatIdentity,g_vec3One);
+		//lightModel.UpdateWorldMatrix(light.ptPosition,g_quatIdentity,g_vec3One);
 
 	}
 

@@ -46,8 +46,20 @@ namespace nsK2EngineLow {
 				m_pivot);
 		}
 
-		void Draw(RenderContext& rc);
+		
 
+		void Draw(RenderContext& rc)
+		{
+
+			g_renderingEngine->AddSprites(this);
+			
+		}
+
+		void OnRenderSprite(RenderContext& rc)
+		{
+			m_sprite.Draw(rc);
+
+		}
 	private:
 
 		Sprite m_sprite;

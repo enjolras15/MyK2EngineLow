@@ -15,13 +15,9 @@ namespace nsK2EngineLow {
 		initData.m_height = static_cast<UINT>(h);
 		initData.m_alphaBlendMode = alphaBlendMode;
 
-		//Sprite初期化オブジェクトを使用して、Spriteを初期化する。
 		m_sprite.Init(initData);
 	}
 
-	void SpriteRender::Draw(RenderContext& rc)
-	{
-		m_sprite.Draw(rc);
-	}
+
 
 	}

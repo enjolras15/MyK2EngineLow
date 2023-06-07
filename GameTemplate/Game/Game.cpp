@@ -11,8 +11,6 @@ Game::Game() {
 	modelRender.Init("Assets/modelData/unityChan.tkm",animationClips, enAnimationClip_Num);
 	spriteRender.Init("Assets/target.dds",100,100);
 
-	offScreen.files.emplace_back("Assets/modelData/unityChan.tkm");
-	offScreen.Init("Assets/modelData/box.tkm", nullptr, 0, enModelUpAxisZ);
 
 	wchar_t tx[256];
 	swprintf_s(tx, 256, L"a%d", int(100));
@@ -46,7 +44,6 @@ void Game::Update() {
 void Game::Render(RenderContext& rc) {
 
 	modelRender.Draw(rc);
-	offScreen.Draw(rc);
 	spriteRender.Draw(rc);
 	fontRender.Draw(rc);
 
