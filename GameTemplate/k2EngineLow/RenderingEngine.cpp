@@ -6,7 +6,7 @@ namespace nsK2EngineLow {
 	RenderingEngine::RenderingEngine() {
 
 		m_sceneLight.Init();
-
+		InitRenderTarget();
 
 	}
 
@@ -26,7 +26,6 @@ namespace nsK2EngineLow {
 
 			spritesit->OnRenderSprite(rc);
 
-
 		}
 
 	}
@@ -37,8 +36,20 @@ namespace nsK2EngineLow {
 
 			fontit->OnRenderFont(rc);
 
-
 		}
+
+	}
+
+	//この辺いにぃ、メインレンダリングターゲットきてるらしいっすよ
+	void RenderingEngine::InitRenderTarget() {
+		m_mainRenderTarget.Create(
+			FRAME_BUFFER_W,
+			FRAME_BUFFER_H,
+			1,
+			1,
+			DXGI_FORMAT_R32G32B32A32_FLOAT,
+			DXGI_FORMAT_D32_FLOAT
+		);
 
 	}
 

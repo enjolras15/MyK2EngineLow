@@ -46,11 +46,15 @@ namespace nsK2EngineLow {
 			return m_sceneLight;
 		}
 
+
+		void InitRenderTarget();
+
 	private:
 		std::vector<ModelRender*> m_models;
 		std::vector<SpriteRender*> m_sprites;
 		std::vector<FontRender*> m_fonts;
 
+		RenderTarget m_mainRenderTarget;
 		SceneLight	m_sceneLight;
 
 	};
