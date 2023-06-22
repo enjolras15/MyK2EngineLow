@@ -1,17 +1,17 @@
 #pragma once
-//#include "Bloom.h"
+#include "Bloom.h"
 namespace nsK2EngineLow{
 
 	class PostEffect
 	{
 	public:
-		void Init(RenderTarget& rc);
+		void Init(RenderTarget& mainRenderTarget);
 		void Render(RenderContext& rc, RenderTarget& mainRenderTarget);
 
 	private:
-		void InitBloom(RenderContext& mainRenderTarget);
+		void InitBloom(RenderTarget& mainRenderTarget);
 
-		//Bloom m_bloom
+		Bloom m_bloom;
 
 	};
 

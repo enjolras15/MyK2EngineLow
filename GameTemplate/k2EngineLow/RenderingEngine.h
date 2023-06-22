@@ -1,5 +1,6 @@
 #pragma once
 #include "Light.h"
+#include "PostEffect.h"
 
 namespace nsK2EngineLow {
 
@@ -56,6 +57,8 @@ namespace nsK2EngineLow {
 
 		RenderTarget m_mainRenderTarget;
 		SceneLight	m_sceneLight;
+
+		PostEffect m_postEffect;
 
 	};
 

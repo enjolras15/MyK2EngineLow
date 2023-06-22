@@ -7,7 +7,7 @@ namespace nsK2EngineLow {
 
 		m_sceneLight.Init();
 		InitRenderTarget();
-
+		//m_postEffect.Init(m_mainRenderTarget);
 	}
 
 	void RenderingEngine::ModelRendering(RenderContext& rc) {
